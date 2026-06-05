@@ -27,10 +27,19 @@ export function AuthorCard({ author, role = 'Author', reviewedBy = false }: Auth
     >
       {/* Visual Avatar - Priority/Preload omitted since it is secondary layout */}
       <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-indigo-100 flex-shrink-0 bg-gray-150">
-        {/* Safe fallback for avatar image during build */}
-        <div className="w-full h-full bg-indigo-600 text-white flex items-center justify-center font-bold text-lg select-none">
-          {author.name.charAt(0)}
-        </div>
+        {author.avatar ? (
+          <Image
+            src={author.avatar}
+            alt={`Photo of ${author.name}`}
+            fill
+            className="object-cover"
+            sizes="64px"
+          />
+        ) : (
+          <div className="w-full h-full bg-indigo-600 text-white flex items-center justify-center font-bold text-lg select-none">
+            {author.name.charAt(0)}
+          </div>
+        )}
       </div>
 
       <div className="space-y-3 flex-1">

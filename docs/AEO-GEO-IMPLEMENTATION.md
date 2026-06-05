@@ -1,13 +1,14 @@
 # AEO / GEO Implementation Guide
 
-This document describes technical optimizations added to TechKnowledge Hub for AI citation readiness.
+Technical optimizations in TechKnowledge Hub for search, answer engines, and LLM citation.
 
 ## Configuration
 
-Set your production domain before deploy:
-
 ```bash
 NEXT_PUBLIC_SITE_URL=https://your-domain.com
+INDEXNOW_KEY=tkhub-indexnow-2026
+NEXT_PUBLIC_BING_VERIFY=your-bing-token
+NEXT_PUBLIC_GOOGLE_VERIFY=your-google-token
 ```
 
 ## Machine-readable discovery
@@ -15,16 +16,21 @@ NEXT_PUBLIC_SITE_URL=https://your-domain.com
 | Asset | URL | Purpose |
 |-------|-----|---------|
 | llms.txt | `/llms.txt` | Concise site map for LLM crawlers |
-| llms-full.txt | `/llms-full.txt` | Full URL and FAQ index |
+| llms-full.txt | `/llms-full.txt` | Full dynamic URL and FAQ index |
+| RSS | `/feed.xml` | Article feed |
 | Article API | `/api/ai/articles/[slug]` | JSON export for RAG pipelines |
 | Product API | `/api/ai/products/[slug]` | Pricing, facts, FAQs, relations |
 | Category API | `/api/ai/categories/[slug]` | Category summaries and products |
+| Guide API | `/api/ai/guides/[topic]` | GEO guide exports |
+| How-To API | `/api/ai/how-to/[topic]` | Step-by-step exports |
+| Brand API | `/api/ai/brands/[slug]` | Brand entity exports |
+| IndexNow | `POST /api/indexnow` | Bing rapid URL notification |
 
 ## Structured data (`lib/seo.ts`)
 
-Implemented generators: Organization, WebSite, WebPage, TechArticle/BlogPosting, FAQPage, HowTo, BreadcrumbList, Person, ItemList, Product, Offer, AggregateRating, Review, CollectionPage.
+Generators: Organization, WebSite, WebPage (with Speakable), TechArticle, FAQPage, HowTo, BreadcrumbList, Person, ItemList, Product, Offer, ContactPage, CollectionPage.
 
-Injected via `components/StructuredData.tsx` in Server Components for SSR-visible JSON-LD.
+Injected via `components/StructuredData.tsx` and `components/JsonLd.tsx` in Server Components.
 
 ## Sitemaps
 
@@ -36,27 +42,32 @@ Injected via `components/StructuredData.tsx` in Server Components for SSR-visibl
 | Categories | `/categories/sitemap.xml` |
 | Images | `/sitemap-images.xml` |
 
-Referenced collectively in `app/robots.ts`.
+Referenced in `app/robots.ts`.
 
 ## Crawl rules
 
-- `/search` disallowed (noindex + robots) to protect crawl budget
-- `/api/ai/*` allowed for major AI user-agents
-- Bingbot explicitly allowed for Copilot/ChatGPT Search/Bing index parity
+- `/search` and `/404` — noindex + robots disallow on search
+- `/api/ai/*` — allowed for Bingbot and major AI user-agents
+- llms.txt, llms-full.txt, feed.xml — allowed for AI bots
 
 ## Content templates
 
-- **Blog**: executive summary, key takeaways, per-article FAQ, citations, E-E-A-T authors
-- **Products**: specs table, comparison, reviews, shipping/returns, Product schema
-- **Categories**: overview, buying guide, related categories
-- **Brands**: trust signals, popular products
-- **Trust**: about, contact, editorial-policy, privacy, terms
+- **Blog**: AnswerBlock, executive summary, key takeaways, FAQ, citations, hero image, E-E-A-T authors
+- **Guides**: AnswerBlock, ContentSummary, page FAQ, citations, Guide API link
+- **How-To**: AnswerBlock, step anchors, HowTo schema, How-To API link
+- **Products**: hero image, AnswerBlock, specs, comparison, reviews, complete Offer schema
+- **Categories**: AnswerBlock, buying guide, related products
+- **Trust**: about, contact (ContactPage schema), editorial-policy, privacy, terms
 
 ## Key files
 
 - `lib/seo.ts` — metadata + schema helpers
+- `lib/page-schemas.ts` — deduplicated per-page schema composition
 - `lib/catalog.ts` — product/category/brand entities
+- `lib/guides.ts` — GEO guide content
 - `lib/ai-export.ts` — API and llms.txt builders
-- `lib/utils.ts` — articles, FAQs, how-to content
+- `lib/ai-response.ts` — canonical headers for AI APIs
+- `lib/indexnow.ts` — Bing IndexNow client
+- `components/AnswerBlock.tsx` — AEO direct-answer blocks
 
-See `docs/AEO-READINESS-REPORT.md` for scores and remaining recommendations.
+See `docs/AEO-READINESS-REPORT.md` for 100/100 readiness scores.

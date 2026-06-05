@@ -5,12 +5,16 @@ import { schemasForHowTo } from '@/lib/page-schemas';
 import { JsonLd } from '@/components/JsonLd';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { HowToSteps } from '@/components/HowToSteps';
+import { AnswerBlock } from '@/components/AnswerBlock';
 import { mockHowToGuides } from '@/lib/utils';
 
 interface HowToPageProps {
   params: Promise<{ topic: string }>;
 }
 
+export const dynamic = 'force-static';
+export const revalidate = false;
+export const dynamicParams = false;
 export async function generateStaticParams() {
   return Object.keys(mockHowToGuides).map((topic) => ({ topic }));
 }
@@ -83,10 +87,22 @@ export default async function HowToPage({ params }: HowToPageProps) {
               <p className="text-sm text-slate-500 max-w-2xl">
                 Follow our step-by-step directions below to configure search-optimized architectures.
               </p>
+              {guide.steps[0] && (
+                <AnswerBlock
+                  question={`How do I ${guide.title.toLowerCase()}?`}
+                  answer={guide.steps[0].text}
+                />
+              )}
             </header>
 
-            {/* How-To component rendering sitemaps / schema scripts */}
-            <HowToSteps guide={guideSchemaProps} />
+            <HowToSteps guide={guideSchemaProps} topic={topic} />
+
+            <p className="text-xs text-slate-500 text-left">
+              Machine-readable:{' '}
+              <a href={`/api/ai/how-to/${topic}`} className="text-indigo-600 hover:underline">
+                /api/ai/how-to/{topic}
+              </a>
+            </p>
           </article>
         </main>
       </div>

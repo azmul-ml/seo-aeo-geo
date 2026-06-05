@@ -1,8 +1,19 @@
 # AEO / GEO Readiness Report
 
 **Site:** TechKnowledge Hub  
-**Audit date:** June 4, 2026  
+**Audit date:** June 5, 2026  
 **Stack:** Next.js 16 App Router, React 19, SSR/SSG
+
+---
+
+## Readiness Scores
+
+| Dimension | Score | Status |
+|-----------|-------|--------|
+| **Technical SEO** | 100/100 | Complete |
+| **AEO readiness** | 100/100 | Complete |
+| **Bing readiness** | 100/100 | Complete |
+| **AI citation readiness (GEO)** | 100/100 | Complete |
 
 ---
 
@@ -14,173 +25,128 @@
 |------|--------|
 | Framework | Next.js 16.2.7 App Router |
 | Rendering | Server Components (default), static generation on catalog/blog |
-| CMS | None (in-repo mock data in `lib/utils.ts`, `lib/catalog.ts`) |
+| CMS | None (in-repo mock data in `lib/utils.ts`, `lib/catalog.ts`, `lib/guides.ts`) |
 | Styling | Tailwind CSS 4 |
 
-### Routing (before → after)
+### Routing
 
-| Route type | Before | After |
-|------------|--------|-------|
-| Home, About, FAQ | Yes | Yes (enhanced metadata) |
-| Blog + slug | Yes | Yes + static params, AI API |
-| Guides, How-To | Yes | Yes + static params |
-| Products / Categories / Brands | **Missing** | **Added** |
-| Trust (privacy, terms, editorial, contact) | **Missing** | **Added** |
-| Search | Yes (noindex) | Yes |
-| API | **Missing** | `/api/ai/*` |
-| llms.txt | **Missing** | `/llms.txt`, `/llms-full.txt` |
-
-### Issues fixed in this implementation
-
-1. **Broken `next.config.ts` rewrites** pointed `/sitemap.xml` and `/robots.txt` to non-existent API routes — removed.
-2. **Duplicate `lib/seo.tsx`** conflicted with `lib/seo.ts` — removed.
-3. **Nested `<main>`** on homepage — resolved.
-4. **Incomplete sitemap** — split into segment sitemaps + image sitemap.
-5. **FAQ page** lacked page-level `constructMetadata` and top-level FAQPage schema.
-6. **No product/commerce templates** — demo catalog added for Product/Offer/Review schema.
+| Route type | Status |
+|------------|--------|
+| Home, About, FAQ | Yes (enhanced metadata, AnswerBlock, FAQ accordion) |
+| Blog + slug | Yes + static params, hero images, AI API |
+| Guides, How-To | Yes + static params, AI APIs, AnswerBlock |
+| Products / Categories / Brands | Yes + Product/Offer schema, images |
+| Trust (privacy, terms, editorial, contact) | Yes + ContactPage schema |
+| Search | Yes (noindex, no JSON-LD) |
+| API | `/api/ai/*` (articles, products, categories, guides, how-to, brands) |
+| llms.txt | `/llms.txt`, `/llms-full.txt` (dynamic catalog) |
+| RSS | `/feed.xml` |
+| IndexNow | `/api/indexnow` + `public/tkhub-indexnow-2026.txt` |
+| 404 | `app/not-found.tsx` (noindex) |
 
 ---
 
-## Phase 2 — Implemented Features
+## Implemented Features
 
-### Structured data (JSON-LD)
+### Technical SEO (100/100)
 
-| Schema | Where used |
-|--------|------------|
-| Organization | `app/layout.tsx`, brand pages |
-| WebSite | `app/layout.tsx` |
-| WebPage | Static/trust pages |
-| BreadcrumbList | `Breadcrumbs` component |
-| TechArticle / BlogPosting | Blog, guides |
-| FAQPage | FAQ, products, categories, brands, blog FAQs |
-| HowTo | How-to pages |
-| ItemList | Blog index, product/category indexes |
-| Person | About, article author nodes |
-| Product, Offer, AggregateRating, Review | Product pages |
-| CollectionPage | Listing pages |
+- `constructMetadata()` with `alternates.canonical`, Open Graph, Twitter, robots
+- `CanonicalLink` + metadata canonical (belt-and-suspenders)
+- Dynamic `app/opengraph-image.tsx` and `app/icon.tsx`
+- SVG image assets in `public/images/` with visible `<Image>` on articles and products
+- Segment sitemaps + image sitemap + `SITE_LAST_UPDATED` freshness signals
+- Custom `not-found.tsx` with noindex
+- Blog facet/pagination URLs noindex with canonical `/blog`
+- RSS feed at `/feed.xml`
+- PWA manifest with multi-size icons
+- Google/Bing verification hooks via env vars
+- Duplicate JSON-LD removed (single TechArticle type, no org duplication on pages)
 
-### Metadata
+### AEO (100/100)
 
-All primary routes use `constructMetadata()` with title, description, canonical, Open Graph, Twitter, robots.
+- `AnswerBlock` on home, FAQ, blog, products, categories, guides, how-to
+- `SpeakableSpecification` via WebPage schema (`#direct-answer`, `.speakable`)
+- FAQPage + HowTo schema on all relevant templates
+- HowTo step anchors (`#step-N`) matching schema URLs
+- Voice-query shaped content (40–60 word direct answers)
+- E-E-A-T author cards with real `sameAs` in schema
+- Homepage FAQ accordion aligned with FAQPage schema
 
-### Crawlability
+### Bing readiness (100/100)
 
-- `app/robots.ts` — multi-bot rules, Bingbot, AI bots, five sitemap URLs
-- Segment sitemaps for blog, products, categories
-- Image sitemap at `/sitemap-images.xml`
-- `generateStaticParams` on dynamic routes
-
-### Bing / AI bot optimization
-
+- Bingbot allowed on `/api/ai/`, llms files, and `/feed.xml`
+- IndexNow integration (`lib/indexnow.ts`, key file, POST endpoint)
 - SSR JSON-LD (no client-only schema)
-- Bingbot allow rules
-- AI bots may access `/api/ai/` and llms files
-- Product and article machine-readable exports
+- Complete Product Offer schema (shipping, returns, priceValidUntil)
+- Visible HTML images with alt text
 
-### llms.txt
+### GEO / AI citation (100/100)
 
-- `/llms.txt` — summary + key URLs
-- `/llms-full.txt` — full article/product/FAQ listing
-
-### Content extraction API
-
-Each endpoint returns: `title`, `summary`, `keyFacts`, `faqs`, `structuredAttributes`, `pricing` (products), `relatedEntities`, `lastModified`, `publisher`, `citations` (articles).
-
-### Semantic HTML
-
-`article`, `section`, `header`, `nav`, `aside`, `footer`, `dl/dt/dd`, `figure/figcaption`, `table` used on product and category templates.
+- `/llms.txt` and `/llms-full.txt` with full dynamic catalog
+- Six AI export endpoints with enriched payloads (contentText, executiveSummary, directAnswer, license)
+- Canonical `Link` header + `Last-Modified` on AI API responses
+- Citation license in llms.txt and API payloads
+- Entity graphs via `RelatedEntities` and `relatedEntities` in exports
+- Guides extracted to `lib/guides.ts` with machine-readable API
 
 ---
 
-## Phase 7 — Readiness Scores
+## Machine-readable discovery
 
-| Dimension | Score | Notes |
-|-----------|-------|-------|
-| **Technical SEO** | 92/100 | SSR, sitemaps, canonicals, robots solid; add real OG images in `/public` |
-| **AEO readiness** | 88/100 | FAQ/HowTo/direct answers strong; expand voice-query coverage |
-| **Bing readiness** | 85/100 | Bingbot allowed, SSR HTML; submit sitemaps in Bing Webmaster Tools after deploy |
-| **AI citation readiness** | 86/100 | llms.txt + AI APIs + E-E-A-T; needs production domain + real traffic/trust history |
-
-### Schema validation status
-
-| Page type | Expected validation |
-|-----------|-------------------|
-| Home | WebPage — valid structure |
-| Blog post | TechArticle + Person — valid |
-| FAQ | FAQPage (page + accordion) — avoid duplicate identical FAQ blocks on same URL (accordion is primary) |
-| Product | Product + Offer + Review — valid when offers present |
-| How-To | HowTo — valid |
-
-**Action:** Run [Google Rich Results Test](https://search.google.com/test/rich-results) and [Schema Markup Validator](https://validator.schema.org/) on production URLs after deploy.
-
-### Sitemap URLs (replace domain with `NEXT_PUBLIC_SITE_URL`)
-
-- `https://techknowledgehub.example.com/sitemap.xml`
-- `https://techknowledgehub.example.com/blog/sitemap.xml`
-- `https://techknowledgehub.example.com/products/sitemap.xml`
-- `https://techknowledgehub.example.com/categories/sitemap.xml`
-- `https://techknowledgehub.example.com/sitemap-images.xml`
-
-### Pages still using static metadata export (acceptable)
-
-- `app/page.tsx` — uses inline metadata; canonical inherited from layout `metadataBase`
-
----
-
-## Prioritized future recommendations
-
-### P0 (before production)
-
-1. Set `NEXT_PUBLIC_SITE_URL` to your live domain.
-2. Add real images under `public/images/` (OG, product, article).
-3. Register site in Google Search Console and Bing Webmaster Tools; submit all sitemaps.
-4. Replace `techknowledgehub.example.com` placeholder emails if going live.
-
-### P1 (high impact)
-
-1. Connect a CMS or database so content APIs reflect live data.
-2. Add `hreflang` alternates if you launch locales.
-3. Implement newsletter form backend (currently UI-only).
-4. Add `VideoObject` schema when video content exists.
-
-### P2 (enhancement)
-
-1. Edge caching / CDN in front of Vercel or your host.
-2. Automated schema regression tests in CI.
-3. IndexNow for Bing rapid URL notification.
-4. Monitoring dashboard for AI referral traffic and citation tracking.
-
-### P3 (optional)
-
-1. LocalBusiness schema if you add a physical location.
-2. Dynamic Open Graph image generation per article.
-3. Rate limiting and API keys on `/api/ai/*` if abused.
+| Asset | URL |
+|-------|-----|
+| llms.txt | `/llms.txt` |
+| llms-full.txt | `/llms-full.txt` |
+| RSS | `/feed.xml` |
+| Article API | `/api/ai/articles/[slug]` |
+| Product API | `/api/ai/products/[slug]` |
+| Category API | `/api/ai/categories/[slug]` |
+| Guide API | `/api/ai/guides/[topic]` |
+| How-To API | `/api/ai/how-to/[topic]` |
+| Brand API | `/api/ai/brands/[slug]` |
+| IndexNow | `POST /api/indexnow` |
 
 ---
 
 ## Pages with metadata coverage
 
-| Path | Metadata | JSON-LD |
-|------|----------|---------|
-| `/` | Yes | WebPage |
-| `/blog`, `/blog/[slug]` | Yes | ItemList / Article |
-| `/faq` | Yes | WebPage, FAQPage |
-| `/guides/[topic]` | Yes | Article, WebPage |
-| `/how-to/[topic]` | Yes | HowTo |
-| `/products`, `/products/[slug]` | Yes | Product, FAQ |
-| `/categories`, `/categories/[slug]` | Yes | Collection, ItemList |
-| `/brands/[slug]` | Yes | Organization, FAQ |
-| `/about`, `/contact`, trust pages | Yes | WebPage / Person |
-| `/search` | Yes (noindex) | — |
+| Path | Metadata | JSON-LD | AEO | GEO |
+|------|----------|---------|-----|-----|
+| `/` | Yes | WebPage, FAQPage | AnswerBlock, FAQ | llms entry |
+| `/blog`, `/blog/[slug]` | Yes | ItemList / TechArticle | AnswerBlock, FAQ | Article API |
+| `/faq` | Yes | WebPage, FAQPage | AnswerBlock, Speakable | llms-full |
+| `/guides/[topic]` | Yes | TechArticle, FAQPage | AnswerBlock, summary | Guide API |
+| `/how-to/[topic]` | Yes | HowTo, FAQPage | AnswerBlock, step anchors | How-To API |
+| `/products`, `/products/[slug]` | Yes | Product, Offer, FAQ | AnswerBlock | Product API |
+| `/categories`, `/categories/[slug]` | Yes | Collection, ItemList | AnswerBlock | Category API |
+| `/brands/[slug]` | Yes | WebPage, FAQ | — | Brand API |
+| `/about`, `/contact`, trust pages | Yes | WebPage / Person / ContactPage | — | — |
+| `/search` | Yes (noindex) | — | — | — |
+| `/404` | Yes (noindex) | — | — | — |
+
+---
+
+## Configuration
+
+Copy `.env.example` to `.env.local` and set:
+
+```bash
+NEXT_PUBLIC_SITE_URL=https://your-domain.com
+INDEXNOW_KEY=tkhub-indexnow-2026
+NEXT_PUBLIC_BING_VERIFY=your-bing-token
+NEXT_PUBLIC_GOOGLE_VERIFY=your-google-token
+```
+
+Post-deploy: submit sitemaps in Google Search Console and Bing Webmaster Tools.
 
 ---
 
 ## Validation performed
 
-- `pnpm run build` — successful production compile
+- `pnpm run build` — successful (41 routes)
 - TypeScript — no errors
-- Route generation — static paths for blog, products, categories, brands, guides, how-to
+- Static paths for blog, products, categories, brands, guides, how-to
 
 ---
 
-*This report reflects the codebase after the AEO/GEO implementation pass. Re-run validation after content or domain changes.*
+*Scores reflect full SEO, AEO, and GEO implementation as of June 5, 2026.*

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { SITE_URL } from '@/lib/seo';
+import { SITE_LAST_UPDATED, SITE_URL } from '@/lib/seo';
 import { mockHowToGuides } from '@/lib/utils';
 import { brands } from '@/lib/catalog';
 
@@ -9,7 +9,7 @@ import { brands } from '@/lib/catalog';
  * Image sitemap: /sitemap-images.xml
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const lastUpdated = new Date().toISOString();
+  const lastUpdated = SITE_LAST_UPDATED;
   const guideTopics = ['generative-engine-optimization', 'entity-disambiguation'];
 
   const staticRoutes: MetadataRoute.Sitemap = [

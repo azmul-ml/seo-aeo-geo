@@ -5,6 +5,8 @@ import { AuthorCard } from '@/components/AuthorCard';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { authors } from '@/lib/utils';
 
+export const dynamic = 'force-static';
+export const revalidate = false;
 export const metadata = constructMetadata({
   title: 'About Our Organization & Editorial Team',
   description:

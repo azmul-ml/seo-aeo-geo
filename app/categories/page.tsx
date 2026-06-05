@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import { SeoLink } from '@/components/SeoLink';
 import { constructMetadata } from '@/lib/seo';
 import { schemasForListing } from '@/lib/page-schemas';
 import { categories } from '@/lib/catalog';
 import { JsonLd } from '@/components/JsonLd';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 
+export const dynamic = 'force-static';
+export const revalidate = false;
 export const metadata: Metadata = constructMetadata({
   title: 'Product Categories',
   description: 'Browse SEO tools and content optimization categories with buying guides and FAQ schema.',
@@ -43,9 +45,9 @@ export default function CategoriesIndexPage() {
               <li key={c.slug}>
                 <article className="bg-white border border-slate-200 rounded-2xl p-6">
                   <h2 className="text-lg font-bold">
-                    <Link href={`/categories/${c.slug}`} className="hover:text-indigo-600">
+                    <SeoLink href={`/categories/${c.slug}`} className="hover:text-indigo-600">
                       {c.name}
-                    </Link>
+                    </SeoLink>
                   </h2>
                   <p className="text-sm text-slate-600 mt-2">{c.summary}</p>
                 </article>

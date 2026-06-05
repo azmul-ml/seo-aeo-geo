@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
+import Image from 'next/image';
+import { SeoLink } from '@/components/SeoLink';
 import { constructMetadata } from '@/lib/seo';
 import { schemasForProduct } from '@/lib/page-schemas';
 import {
@@ -15,11 +16,15 @@ import { JsonLd } from '@/components/JsonLd';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { FaqAccordion } from '@/components/FaqAccordion';
 import { RelatedEntities } from '@/components/RelatedEntities';
+import { AnswerBlock } from '@/components/AnswerBlock';
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
 
+export const dynamic = 'force-static';
+export const revalidate = false;
+export const dynamicParams = false;
 export async function generateStaticParams() {
   return products.map((p) => ({ slug: p.slug }));
 }
@@ -81,13 +86,24 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 <>
                   {' '}
                   &middot;{' '}
-                  <Link href={`/brands/${brand.slug}`} className="hover:underline">
+                  <SeoLink href={`/brands/${brand.slug}`} className="hover:underline">
                     {brand.name}
-                  </Link>
+                  </SeoLink>
                 </>
               )}
             </p>
             <h1 className="text-3xl sm:text-4xl font-black text-slate-900">{product.name}</h1>
+            <div className="relative w-full aspect-[2/1] max-h-64 rounded-xl overflow-hidden border border-slate-200">
+              <Image
+                src={product.image}
+                alt={`Product image: ${product.name}`}
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 768px"
+                priority
+              />
+            </div>
+            <AnswerBlock question={`What is ${product.name}?`} answer={product.summary} />
             <p className="text-sm text-slate-600 leading-relaxed font-medium">{product.summary}</p>
             <dl className="flex flex-wrap gap-4 text-xs font-semibold text-slate-600 pt-2">
               <div>
@@ -249,9 +265,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
           <p className="text-xs text-slate-500 text-center">
             Machine-readable export:{' '}
-            <Link href={`/api/ai/products/${slug}`} className="text-indigo-600 hover:underline">
+            <SeoLink href={`/api/ai/products/${slug}`} className="text-indigo-600 hover:underline">
               /api/ai/products/{slug}
-            </Link>
+            </SeoLink>
           </p>
         </div>
       </article>

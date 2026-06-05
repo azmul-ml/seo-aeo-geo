@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
+import { SeoLink } from '@/components/SeoLink';
 import { constructMetadata } from '@/lib/seo';
 import { schemasForBrand } from '@/lib/page-schemas';
 import { brands, getBrand, getProduct } from '@/lib/catalog';
@@ -12,6 +12,9 @@ interface BrandPageProps {
   params: Promise<{ slug: string }>;
 }
 
+export const dynamic = 'force-static';
+export const revalidate = false;
+export const dynamicParams = false;
 export async function generateStaticParams() {
   return brands.map((b) => ({ slug: b.slug }));
 }
@@ -70,13 +73,13 @@ export default async function BrandPage({ params }: BrandPageProps) {
             <ul className="space-y-3">
               {popular.map((p) => (
                 <li key={p!.slug}>
-                  <Link
+                  <SeoLink
                     href={`/products/${p!.slug}`}
                     className="block bg-white border border-slate-200 rounded-xl p-4 hover:border-indigo-200"
                   >
                     <span className="font-bold text-slate-900">{p!.name}</span>
                     <p className="text-xs text-slate-600 mt-1">{p!.summary}</p>
-                  </Link>
+                  </SeoLink>
                 </li>
               ))}
             </ul>

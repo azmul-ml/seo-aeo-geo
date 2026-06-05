@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import { SeoLink } from '@/components/SeoLink';
 import { constructMetadata } from '@/lib/seo';
 import { schemasForTrustPage } from '@/lib/page-schemas';
 import { JsonLd } from '@/components/JsonLd';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 
+export const dynamic = 'force-static';
+export const revalidate = false;
 export const metadata: Metadata = constructMetadata({
   title: 'Editorial Policy & Fact-Checking Standards',
   description:
@@ -44,9 +46,9 @@ export default function EditorialPolicyPage() {
             </ul>
             <p>
               Report corrections via{' '}
-              <Link href="/contact" className="text-indigo-600 hover:underline">
+              <SeoLink href="/contact" className="text-indigo-600 hover:underline">
                 Contact
-              </Link>{' '}
+              </SeoLink>{' '}
               or email{' '}
               <a href="mailto:editorial@techknowledgehub.example.com" className="text-indigo-600 hover:underline">
                 editorial@techknowledgehub.example.com

@@ -12,6 +12,9 @@ export const SITE_URL =
   'https://techknowledgehub.example.com';
 export const SITE_NAME = 'TechKnowledge Hub';
 
+/** Content freshness signal for sitemaps (update when publishing). */
+export const SITE_LAST_UPDATED = '2026-06-05T00:00:00Z';
+
 /** Primary XML sitemap (also listed in robots.txt). */
 export const SITEMAP_URL = `${SITE_URL}/sitemap.xml`;
 
@@ -59,7 +62,7 @@ export function constructMetadata({
   title,
   description,
   path,
-  image = '/images/default-og.jpg',
+  image = '/images/default-og.svg',
   type = 'website',
   publishedTime,
   modifiedTime,
@@ -72,9 +75,11 @@ export function constructMetadata({
   return {
     title,
     description,
-    // Canonical <link> is rendered via <CanonicalLink path={...} /> (hoisted to <head>)
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
-      title: `${title} | ${SITE_NAME}`,
+      title,
       description,
       url: canonicalUrl,
       siteName: SITE_NAME,
@@ -95,7 +100,7 @@ export function constructMetadata({
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${title} | ${SITE_NAME}`,
+      title,
       description,
       images: [absoluteImageUrl],
     },
@@ -150,7 +155,7 @@ export function generateOrganizationSchema() {
     url: SITE_URL,
     logo: {
       '@type': 'ImageObject',
-      url: `${SITE_URL}/images/logo.png`,
+      url: `${SITE_URL}/images/logo.svg`,
       width: '180',
       height: '60',
     },
@@ -179,9 +184,16 @@ export interface WebPageSchemaProps {
   name: string;
   description: string;
   isPartOfId?: string;
+  speakableSelectors?: string[];
 }
 
-export function generateWebPageSchema({ id, name, description, isPartOfId }: WebPageSchemaProps) {
+export function generateWebPageSchema({
+  id,
+  name,
+  description,
+  isPartOfId,
+  speakableSelectors,
+}: WebPageSchemaProps) {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
@@ -195,6 +207,13 @@ export function generateWebPageSchema({ id, name, description, isPartOfId }: Web
     publisher: {
       '@id': `${SITE_URL}/#organization`,
     },
+    ...(speakableSelectors &&
+      speakableSelectors.length > 0 && {
+        speakable: {
+          '@type': 'SpeakableSpecification',
+          cssSelector: speakableSelectors,
+        },
+      }),
   };
 }
 
@@ -205,6 +224,7 @@ export function generateWebPageSchema({ id, name, description, isPartOfId }: Web
  */
 export interface ArticleSchemaProps {
   slug: string;
+  path?: string;
   title: string;
   description: string;
   image: string;
@@ -213,12 +233,14 @@ export interface ArticleSchemaProps {
   authorName: string;
   authorBio?: string;
   authorCredentials?: string[];
+  authorSameAs?: string[];
   reviewedByName?: string;
   reviewedByBio?: string;
 }
 
 export function generateArticleSchema({
   slug,
+  path,
   title,
   description,
   image,
@@ -227,15 +249,17 @@ export function generateArticleSchema({
   authorName,
   authorBio,
   authorCredentials,
+  authorSameAs,
   reviewedByName,
   reviewedByBio,
 }: ArticleSchemaProps) {
-  const articleUrl = `${SITE_URL}/blog/${slug}`;
+  const articlePath = path ?? `/blog/${slug}`;
+  const articleUrl = `${SITE_URL}${articlePath.startsWith('/') ? articlePath : `/${articlePath}`}`;
   const authorId = `${SITE_URL}/about/#${authorName.toLowerCase().replace(/\s+/g, '-')}`;
 
   return {
     '@context': 'https://schema.org',
-    '@type': 'TechArticle', // Specialized Article type to convey technical depth for GEO
+    '@type': 'TechArticle',
     '@id': `${articleUrl}/#article`,
     isPartOf: {
       '@type': 'WebPage',
@@ -253,10 +277,10 @@ export function generateArticleSchema({
       name: authorName,
       description: authorBio || 'Expert technology writer and developer.',
       jobTitle: authorCredentials?.[0] || 'Technical Specialist',
-      sameAs: [
-        `https://twitter.com/${authorName.toLowerCase().replace(/\s+/g, '')}`,
-        `https://linkedin.com/in/${authorName.toLowerCase().replace(/\s+/g, '')}`,
-      ],
+      ...(authorSameAs &&
+        authorSameAs.length > 0 && {
+          sameAs: authorSameAs,
+        }),
     },
     publisher: {
       '@id': `${SITE_URL}/#organization`,
@@ -309,6 +333,7 @@ export interface HowToStep {
 export interface HowToSchemaProps {
   name: string;
   description: string;
+  topic?: string;
   steps: HowToStep[];
   estimatedTimeMinutes: number;
   tools?: string[];
@@ -318,11 +343,14 @@ export interface HowToSchemaProps {
 export function generateHowToSchema({
   name,
   description,
+  topic,
   steps,
   estimatedTimeMinutes,
   tools = [],
   supplies = [],
 }: HowToSchemaProps) {
+  const basePath = topic ? `/how-to/${topic}` : '/how-to';
+
   return {
     '@context': 'https://schema.org',
     '@type': 'HowTo',
@@ -344,7 +372,7 @@ export function generateHowToSchema({
       '@type': 'HowToStep',
       name: step.name,
       text: step.text,
-      url: step.url || `${SITE_URL}/how-to/#step-${idx + 1}`,
+      url: step.url || `${SITE_URL}${basePath}#step-${idx + 1}`,
       ...(step.image && {
         image: step.image.startsWith('http') ? step.image : `${SITE_URL}${step.image}`,
       }),
@@ -378,10 +406,20 @@ export function generateBreadcrumbSchema(items: BreadcrumbItem[]) {
   };
 }
 
-/** BlogPosting alias for article listings */
-export function generateBlogPostingSchema(props: ArticleSchemaProps) {
-  const base = generateArticleSchema(props);
-  return { ...base, '@type': 'BlogPosting' };
+export function generateContactPageSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ContactPage',
+    '@id': `${SITE_URL}/contact/#contactpage`,
+    url: `${SITE_URL}/contact`,
+    name: 'Contact TechKnowledge Hub',
+    description: 'Contact editorial, support, and partnerships.',
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+    mainEntity: {
+      '@type': 'Organization',
+      '@id': `${SITE_URL}/#organization`,
+    },
+  };
 }
 
 export interface PersonSchemaProps {
@@ -445,6 +483,8 @@ export interface ProductSchemaProps {
   price: number;
   currency: string;
   availability: 'InStock' | 'OutOfStock' | 'PreOrder';
+  shippingInfo?: string;
+  returnPolicy?: string;
   ratingValue?: number;
   reviewCount?: number;
   reviews?: { author: string; datePublished: string; reviewBody: string; ratingValue: number }[];
@@ -460,6 +500,8 @@ export function generateProductSchema({
   price,
   currency,
   availability,
+  shippingInfo,
+  returnPolicy,
   ratingValue,
   reviewCount,
   reviews = [],
@@ -487,7 +529,30 @@ export function generateProductSchema({
       priceCurrency: currency,
       price: price.toFixed(2),
       availability: availabilityMap[availability],
+      itemCondition: 'https://schema.org/NewCondition',
+      priceValidUntil: '2027-12-31',
       seller: { '@id': `${SITE_URL}/#organization` },
+      ...(shippingInfo && {
+        shippingDetails: {
+          '@type': 'OfferShippingDetails',
+          shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'US' },
+          deliveryTime: {
+            '@type': 'ShippingDeliveryTime',
+            handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 0, unitCode: 'DAY' },
+            transitTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 0, unitCode: 'DAY' },
+          },
+          description: shippingInfo,
+        },
+      }),
+      ...(returnPolicy && {
+        hasMerchantReturnPolicy: {
+          '@type': 'MerchantReturnPolicy',
+          applicableCountry: 'US',
+          returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+          merchantReturnDays: 14,
+          description: returnPolicy,
+        },
+      }),
     },
     ...(ratingValue &&
       reviewCount && {

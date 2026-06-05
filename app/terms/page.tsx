@@ -4,6 +4,8 @@ import { schemasForTrustPage } from '@/lib/page-schemas';
 import { JsonLd } from '@/components/JsonLd';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 
+export const dynamic = 'force-static';
+export const revalidate = false;
 export const metadata: Metadata = constructMetadata({
   title: 'Terms of Service',
   description: 'Terms governing use of TechKnowledge Hub content, tools, and digital products.',

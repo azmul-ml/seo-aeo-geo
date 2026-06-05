@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import { SeoLink } from '@/components/SeoLink';
 import { constructMetadata } from '@/lib/seo';
 import { schemasForListing } from '@/lib/page-schemas';
 import { products } from '@/lib/catalog';
 import { JsonLd } from '@/components/JsonLd';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 
+export const dynamic = 'force-static';
+export const revalidate = false;
 export const metadata: Metadata = constructMetadata({
   title: 'SEO & GEO Product Catalog',
   description:
@@ -48,9 +50,9 @@ export default function ProductsIndexPage() {
                 className="bg-white border border-slate-200 rounded-2xl p-6 shadow-2xs text-left"
               >
                 <h2 className="text-lg font-bold text-slate-900">
-                  <Link href={`/products/${product.slug}`} className="hover:text-indigo-600">
+                  <SeoLink href={`/products/${product.slug}`} className="hover:text-indigo-600">
                     {product.name}
-                  </Link>
+                  </SeoLink>
                 </h2>
                 <p className="text-sm text-slate-600 mt-2">{product.summary}</p>
                 <p className="text-xs font-bold text-indigo-600 mt-4">

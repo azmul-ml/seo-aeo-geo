@@ -1,12 +1,16 @@
-import Link from 'next/link';
+import { SeoLink } from '@/components/SeoLink';
 import { constructMetadata } from '@/lib/seo';
 import { schemasForHome } from '@/lib/page-schemas';
 import { JsonLd } from '@/components/JsonLd';
 import { ArticleCard } from '@/components/ArticleCard';
-import { mockArticles } from '@/lib/utils';
+import { AnswerBlock } from '@/components/AnswerBlock';
+import { FaqAccordion } from '@/components/FaqAccordion';
+import { mockArticles, mockFaqs } from '@/lib/utils';
 
+export const dynamic = 'force-static';
+export const revalidate = false;
 export const metadata = constructMetadata({
-  title: 'Home | TechKnowledge Hub',
+  title: 'Home',
   description:
     'Learn Technical SEO, Answer Engine Optimization (AEO), and Generative Engine Optimization (GEO) through detailed guides, tutorials, and schemas.',
   path: '/',
@@ -45,20 +49,27 @@ export default function Home() {
             <p className="max-w-2xl mx-auto text-base sm:text-lg text-slate-500 leading-relaxed font-medium">
               Dive deep into technical crawler schemas, voice-search answer optimization (Position Zero), and generative AI engine citation signals.
             </p>
+
+            <div className="max-w-2xl mx-auto text-left pt-2">
+              <AnswerBlock
+                question="What are SEO, AEO, and GEO?"
+                answer="SEO optimizes pages for traditional search rankings. AEO structures direct answers for voice assistants and featured snippets. GEO formats content with citations and machine-readable exports so LLMs cite your site in AI-generated responses."
+              />
+            </div>
             
             <div className="flex flex-wrap justify-center gap-4 pt-4">
-              <Link 
+              <SeoLink 
                 href="/blog" 
                 className="px-6 py-3 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all duration-150 rounded-xl shadow-md hover:shadow-lg"
               >
                 Read Optimization Blog &rarr;
-              </Link>
-              <Link 
+              </SeoLink>
+              <SeoLink 
                 href="/faq" 
                 className="px-6 py-3 text-sm font-bold text-slate-700 bg-white border border-slate-250 hover:bg-slate-50 transition-all duration-150 rounded-xl shadow-xs"
               >
                 Explore FAQ Accordion
-              </Link>
+              </SeoLink>
             </div>
           </div>
         </section>
@@ -84,9 +95,9 @@ export default function Home() {
                   Configuring server-rendering pipelines, relative canonical paths, dynamic XML sitemaps, robots.txt directives, and explicit microdata schemas.
                 </p>
               </div>
-              <Link href="/blog/seo-fundamentals-2026" className="mt-6 text-xs font-bold text-indigo-600 hover:underline inline-flex items-center gap-1">
+              <SeoLink href="/blog/seo-fundamentals-2026" className="mt-6 text-xs font-bold text-indigo-600 hover:underline inline-flex items-center gap-1">
                 Learn Technical SEO &rarr;
-              </Link>
+              </SeoLink>
             </div>
 
             {/* Box 2 - AEO */}
@@ -100,9 +111,9 @@ export default function Home() {
                   Structuring question-based headers, micro Q&A fragments, details/summary disclosure layouts, and FAQPage schemas to claim voice search features.
                 </p>
               </div>
-              <Link href="/blog/aeo-optimization-guide" className="mt-6 text-xs font-bold text-indigo-600 hover:underline inline-flex items-center gap-1">
+              <SeoLink href="/blog/aeo-optimization-guide" className="mt-6 text-xs font-bold text-indigo-600 hover:underline inline-flex items-center gap-1">
                 Explore AEO Guide &rarr;
-              </Link>
+              </SeoLink>
             </div>
 
             {/* Box 3 - GEO */}
@@ -116,9 +127,9 @@ export default function Home() {
                   Optimizing informational density, factual statements, references/citation anchors, and E-E-A-T credentials for LLM extraction algorithms.
                 </p>
               </div>
-              <Link href="/blog/geo-future-of-search" className="mt-6 text-xs font-bold text-indigo-600 hover:underline inline-flex items-center gap-1">
+              <SeoLink href="/blog/geo-future-of-search" className="mt-6 text-xs font-bold text-indigo-600 hover:underline inline-flex items-center gap-1">
                 Discover GEO Strategy &rarr;
-              </Link>
+              </SeoLink>
             </div>
           </div>
         </section>
@@ -131,12 +142,12 @@ export default function Home() {
                 <h2 className="text-2xl sm:text-3xl font-black text-slate-900">Deep-Dive Guides</h2>
                 <p className="text-sm text-slate-500 mt-1 font-medium">Our latest research studies and implementation checklists.</p>
               </div>
-              <Link 
+              <SeoLink 
                 href="/blog" 
                 className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-0.5"
               >
                 Browse all guides &rarr;
-              </Link>
+              </SeoLink>
             </div>
 
             <div className="grid gap-6 md:grid-cols-3">
@@ -145,6 +156,12 @@ export default function Home() {
               ))}
             </div>
           </div>
+        </section>
+
+        {/* Homepage FAQ (matches FAQPage schema) */}
+        <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 text-left">
+          <h2 className="text-xl font-bold text-slate-900 mb-4">Quick answers</h2>
+          <FaqAccordion items={mockFaqs.slice(0, 3)} />
         </section>
 
         {/* Call to Action - Interactive Newsletter */}
@@ -158,9 +175,10 @@ export default function Home() {
               Subscribe to our bi-weekly newsletter to receive search optimization techniques, schema updates, and AI indexation insights.
             </p>
             
-            <form className="max-w-md mx-auto flex flex-col sm:flex-row gap-3 pt-3">
+            <form action="/api/newsletter" method="post" aria-label="Newsletter signup" className="max-w-md mx-auto flex flex-col sm:flex-row gap-3 pt-3">
               <input 
-                type="email" 
+                type="email"
+                name="email"
                 placeholder="Enter your professional email" 
                 required 
                 className="flex-grow bg-white/10 border border-white/20 placeholder-indigo-200 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-white/50 backdrop-blur-xs font-medium"

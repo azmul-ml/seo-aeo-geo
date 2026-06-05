@@ -1,16 +1,16 @@
 import type { Article, HowToGuide } from './utils';
 import { mockFaqs } from './utils';
+import type { GuideContent } from './guides';
 import {
   type ArticleSchemaProps,
   type FAQItem,
   type HowToSchemaProps,
   generateArticleSchema,
-  generateBlogPostingSchema,
   generateCollectionPageSchema,
+  generateContactPageSchema,
   generateFAQSchema,
   generateHowToSchema,
   generateItemListSchema,
-  generateOrganizationSchema,
   generatePersonSchema,
   generateProductSchema,
   generateWebPageSchema,
@@ -22,20 +22,19 @@ import { getAggregateRating, getBrand } from './catalog';
 
 type Schema = Record<string, unknown>;
 
+const SPEAKABLE = ['#direct-answer', '.speakable'];
+
 function compact(schemas: (Schema | null | undefined)[]): Schema[] {
   return schemas.filter((s): s is Schema => Boolean(s));
 }
 
-export function organizationSchema(): Schema {
-  return generateOrganizationSchema();
-}
-
-export function webPageSchema(path: string, name: string, description: string): Schema {
+export function webPageSchema(path: string, name: string, description: string, speakable = false): Schema {
   const normalized = path.startsWith('/') ? path : `/${path}`;
   return generateWebPageSchema({
     id: `${SITE_URL}${normalized}`,
     name,
     description,
+    ...(speakable && { speakableSelectors: SPEAKABLE }),
   });
 }
 
@@ -44,17 +43,14 @@ export function faqSchemas(items: FAQItem[]): Schema[] {
   return [generateFAQSchema(items)];
 }
 
-export function articleSchemas(props: ArticleSchemaProps): Schema[] {
-  return [generateArticleSchema(props), generateBlogPostingSchema(props)];
-}
-
-export function howToSchemas(props: HowToSchemaProps): Schema[] {
-  return [generateHowToSchema(props)];
+export function articleSchema(props: ArticleSchemaProps): Schema {
+  return generateArticleSchema(props);
 }
 
 function articlePropsFromArticle(article: Article): ArticleSchemaProps {
   return {
     slug: article.slug,
+    path: `/blog/${article.slug}`,
     title: article.title,
     description: article.description,
     image: article.image,
@@ -63,6 +59,7 @@ function articlePropsFromArticle(article: Article): ArticleSchemaProps {
     authorName: article.author.name,
     authorBio: article.author.bio,
     authorCredentials: article.author.credentials,
+    authorSameAs: article.author.sameAs,
     reviewedByName: article.reviewedBy?.name,
     reviewedByBio: article.reviewedBy?.bio,
   };
@@ -88,16 +85,14 @@ export function siteFaqSubset(count = 2): FAQItem[] {
 
 export function schemasForHome(): Schema[] {
   return compact([
-    organizationSchema(),
-    webPageSchema('/', 'TechKnowledge Hub Homepage', 'SEO, AEO, and GEO knowledge hub.'),
-    ...faqSchemas(mockFaqs),
+    webPageSchema('/', 'TechKnowledge Hub Homepage', 'SEO, AEO, and GEO knowledge hub.', true),
+    ...faqSchemas(siteFaqSubset(3)),
   ]);
 }
 
 export function schemasForFaqPage(): Schema[] {
   return compact([
-    organizationSchema(),
-    webPageSchema('/faq', 'Search Optimization FAQ Hub', 'FAQ hub for SEO, AEO, and GEO.'),
+    webPageSchema('/faq', 'Search Optimization FAQ Hub', 'FAQ hub for SEO, AEO, and GEO.', true),
     ...faqSchemas([...faqPageDefinitions, ...mockFaqs]),
   ]);
 }
@@ -107,34 +102,41 @@ export function schemasForBlogPost(article: Article): Schema[] {
   const faqs = article.pageFaqs?.length ? article.pageFaqs : siteFaqSubset(2);
 
   return compact([
-    organizationSchema(),
-    webPageSchema(path, article.title, article.description),
-    ...articleSchemas(articlePropsFromArticle(article)),
+    webPageSchema(path, article.title, article.description, true),
+    articleSchema(articlePropsFromArticle(article)),
     ...faqSchemas(faqs),
   ]);
 }
 
 export function schemasForBlogIndex(description: string): Schema[] {
   return compact([
-    organizationSchema(),
     webPageSchema('/blog', 'Article Library', description),
     ...faqSchemas(siteFaqSubset(3)),
   ]);
 }
 
-export function schemasForGuide(
-  topic: string,
-  title: string,
-  description: string,
-  articleProps: ArticleSchemaProps,
-  extraFaqs: FAQItem[] = []
-): Schema[] {
-  const path = `/guides/${topic}`;
+export function schemasForGuide(guide: GuideContent, extraFaqs: FAQItem[] = []): Schema[] {
+  const path = `/guides/${guide.topic}`;
+  const faqs = extraFaqs.length ? extraFaqs : guide.pageFaqs?.length ? guide.pageFaqs : siteFaqSubset(2);
+
   return compact([
-    organizationSchema(),
-    webPageSchema(path, title, description),
-    ...articleSchemas(articleProps),
-    ...faqSchemas(extraFaqs.length ? extraFaqs : siteFaqSubset(2)),
+    webPageSchema(path, guide.title, guide.description, true),
+    articleSchema({
+      slug: guide.topic,
+      path,
+      title: guide.title,
+      description: guide.description,
+      image: '/images/default-og.svg',
+      datePublished: guide.datePublished,
+      dateModified: guide.dateModified,
+      authorName: guide.author.name,
+      authorBio: guide.author.bio,
+      authorCredentials: guide.author.credentials,
+      authorSameAs: guide.author.sameAs,
+      reviewedByName: guide.reviewer.name,
+      reviewedByBio: guide.reviewer.bio,
+    }),
+    ...faqSchemas(faqs),
   ]);
 }
 
@@ -143,6 +145,7 @@ export function schemasForHowTo(guide: HowToGuide, topic: string): Schema[] {
   const howToProps: HowToSchemaProps = {
     name: guide.title,
     description: guide.description,
+    topic,
     steps: guide.steps,
     estimatedTimeMinutes: guide.estimatedTimeMinutes,
     tools: guide.tools,
@@ -164,20 +167,8 @@ export function schemasForHowTo(guide: HowToGuide, topic: string): Schema[] {
   ];
 
   return compact([
-    organizationSchema(),
-    webPageSchema(path, guide.title, guide.description),
-    ...howToSchemas(howToProps),
-    ...articleSchemas({
-      slug: `how-to/${topic}`,
-      title: guide.title,
-      description: guide.description,
-      image: '/images/default-og.jpg',
-      datePublished: '2026-01-01T08:00:00Z',
-      dateModified: '2026-06-01T08:00:00Z',
-      authorName: 'Dr. Alex Johnson',
-      authorBio: 'Search engineering specialist and technical SEO author.',
-      authorCredentials: ['Ph.D. in Computational Linguistics'],
-    }),
+    webPageSchema(path, guide.title, guide.description, true),
+    generateHowToSchema(howToProps),
     ...faqSchemas(howToFaqs),
   ]);
 }
@@ -188,8 +179,7 @@ export function schemasForProduct(product: Product, slug: string): Schema[] {
   const rating = getAggregateRating(product);
 
   return compact([
-    organizationSchema(),
-    webPageSchema(path, product.name, product.summary),
+    webPageSchema(path, product.name, product.summary, true),
     generateProductSchema({
       slug: product.slug,
       name: product.name,
@@ -200,20 +190,11 @@ export function schemasForProduct(product: Product, slug: string): Schema[] {
       price: product.price,
       currency: product.currency,
       availability: product.availability,
+      shippingInfo: product.shippingInfo,
+      returnPolicy: product.returnPolicy,
       ratingValue: rating?.ratingValue,
       reviewCount: rating?.reviewCount,
       reviews: product.reviews,
-    }),
-    ...articleSchemas({
-      slug: `products/${slug}`,
-      title: product.name,
-      description: product.summary,
-      image: product.image,
-      datePublished: '2026-01-01T08:00:00Z',
-      dateModified: product.dateModified,
-      authorName: 'TechKnowledge Hub Editorial',
-      authorBio: 'Product research and documentation team.',
-      authorCredentials: ['Technical SEO specialists'],
     }),
     ...faqSchemas(product.faqs),
   ]);
@@ -228,8 +209,7 @@ export function schemasForCategory(
 ): Schema[] {
   const path = `/categories/${slug}`;
   return compact([
-    organizationSchema(),
-    webPageSchema(path, name, summary),
+    webPageSchema(path, name, summary, true),
     generateCollectionPageSchema({ id: `${SITE_URL}${path}`, name, description: summary }),
     ...faqSchemas(faqs),
     products.length > 0
@@ -246,13 +226,7 @@ export function schemasForBrand(
 ): Schema[] {
   const path = `/brands/${slug}`;
   return compact([
-    {
-      ...generateOrganizationSchema(),
-      name,
-      description: summary,
-      url: `${SITE_URL}${path}`,
-    },
-    webPageSchema(path, name, summary),
+    webPageSchema(path, name, summary, true),
     ...faqSchemas(faqs),
   ]);
 }
@@ -264,15 +238,39 @@ export function schemasForTrustPage(
   faqs: FAQItem[] = siteFaqSubset(2)
 ): Schema[] {
   return compact([
-    organizationSchema(),
     webPageSchema(path, name, description),
     ...faqSchemas(faqs),
   ]);
 }
 
+const contactFaqs: FAQItem[] = [
+  {
+    question: 'How do I contact TechKnowledge Hub?',
+    answer:
+      'Use the contact form on this page or email editorial@techknowledgehub.example.com for content corrections, support@techknowledgehub.example.com for product help, or partnerships@techknowledgehub.example.com for business inquiries.',
+  },
+  {
+    question: 'How quickly does TechKnowledge Hub respond to inquiries?',
+    answer:
+      'Editorial and support teams aim to respond within 2 business days. Urgent factual corrections on published articles are prioritized within 24 hours.',
+  },
+  {
+    question: 'Can I request a correction to an article?',
+    answer:
+      'Yes. Send the article URL, the specific claim, and your source to editorial@techknowledgehub.example.com. Corrections follow our editorial policy and are logged with a last-modified date.',
+  },
+];
+
+export function schemasForContact(): Schema[] {
+  return compact([
+    webPageSchema('/contact', 'Contact TechKnowledge Hub', 'Contact editorial and support.', true),
+    generateContactPageSchema(),
+    ...faqSchemas(contactFaqs),
+  ]);
+}
+
 export function schemasForAbout(people: Author[]): Schema[] {
   return compact([
-    organizationSchema(),
     webPageSchema(
       '/about',
       'About TechKnowledge Hub',
@@ -300,7 +298,6 @@ export function schemasForListing(
   items: { name: string; url: string; description?: string }[]
 ): Schema[] {
   return compact([
-    organizationSchema(),
     webPageSchema(path, name, description),
     generateCollectionPageSchema({ id: `${SITE_URL}${path}`, name, description }),
     generateItemListSchema(listName, items),

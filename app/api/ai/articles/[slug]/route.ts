@@ -1,5 +1,5 @@
 import { exportArticle } from '@/lib/ai-export';
-import { NextResponse } from 'next/server';
+import { aiJsonResponse } from '@/lib/ai-response';
 
 export async function GET(
   _request: Request,
@@ -9,10 +9,8 @@ export async function GET(
   const payload = exportArticle(slug);
 
   if (!payload) {
-    return NextResponse.json({ error: 'Article not found' }, { status: 404 });
+    return Response.json({ error: 'Article not found' }, { status: 404 });
   }
 
-  return NextResponse.json(payload, {
-    headers: { 'Content-Type': 'application/json; charset=utf-8' },
-  });
+  return aiJsonResponse(payload, `/blog/${slug}`, payload.lastModified);
 }

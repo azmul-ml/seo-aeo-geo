@@ -1,6 +1,6 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
-import Link from 'next/link';
+import { SeoLink } from '@/components/SeoLink';
 import { StructuredData } from '@/components/StructuredData';
 import {
   generateWebsiteSchema,
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     siteName: 'TechKnowledge Hub',
     images: [
       {
-        url: '/images/default-og.jpg',
+        url: '/images/default-og.svg',
         width: 1200,
         height: 630,
         alt: 'TechKnowledge Hub Logo',
@@ -43,8 +43,23 @@ export const metadata: Metadata = {
     images: ['/images/default-og.jpg'],
   },
   icons: {
-    icon: '/favicon.ico',
+    icon: [{ url: '/icon', type: 'image/png' }],
+    apple: [{ url: '/images/icons/icon-192.svg', sizes: '192x192', type: 'image/svg+xml' }],
   },
+  ...(process.env.NEXT_PUBLIC_GOOGLE_VERIFY && {
+    verification: {
+      google: process.env.NEXT_PUBLIC_GOOGLE_VERIFY,
+      ...(process.env.NEXT_PUBLIC_BING_VERIFY && {
+        other: { 'msvalidate.01': process.env.NEXT_PUBLIC_BING_VERIFY },
+      }),
+    },
+  }),
+  ...(!process.env.NEXT_PUBLIC_GOOGLE_VERIFY &&
+    process.env.NEXT_PUBLIC_BING_VERIFY && {
+      verification: {
+        other: { 'msvalidate.01': process.env.NEXT_PUBLIC_BING_VERIFY },
+      },
+    }),
 };
 
 // 2. Viewport API - Migrated out of metadata in Next.js 14+ to prevent render-blocking head parsing
@@ -79,6 +94,8 @@ export default function RootLayout({
         ))}
         <link rel="alternate" type="text/plain" title="LLMs.txt" href={LLMS_TXT_URL} />
         <link rel="alternate" type="text/plain" title="LLMs.txt (full index)" href={LLMS_FULL_TXT_URL} />
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed" href={`${SITE_URL}/feed.xml`} />
+        <link rel="apple-touch-icon" href="/images/icons/icon-192.svg" />
         <StructuredData schema={generateWebsiteSchema()} />
         <StructuredData schema={generateOrganizationSchema()} />
       </head>
@@ -89,26 +106,27 @@ export default function RootLayout({
             <div className="flex justify-between items-center h-16">
               {/* Logo */}
               <div className="flex-shrink-0">
-                <Link href="/" className="flex items-center gap-2 font-black text-xl text-gradient">
+                <SeoLink href="/" className="flex items-center gap-2 font-black text-xl text-gradient">
                   TechKnowledge
-                </Link>
+                </SeoLink>
               </div>
 
               {/* Navigation Items */}
               <nav aria-label="Main navigation" className="hidden md:flex space-x-6 text-sm font-semibold text-slate-600">
-                <Link href="/" className="hover:text-indigo-600 transition-colors">Home</Link>
-                <Link href="/blog" className="hover:text-indigo-600 transition-colors">Blog</Link>
-                <Link href="/faq" className="hover:text-indigo-600 transition-colors">FAQ</Link>
-                <Link href="/how-to/nextjs-sitemap-generation" className="hover:text-indigo-600 transition-colors">How-To</Link>
-                <Link href="/guides/generative-engine-optimization" className="hover:text-indigo-600 transition-colors">GEO Guides</Link>
-                <Link href="/products" className="hover:text-indigo-600 transition-colors">Products</Link>
-                <Link href="/categories" className="hover:text-indigo-600 transition-colors">Categories</Link>
-                <Link href="/about" className="hover:text-indigo-600 transition-colors">About</Link>
+                <SeoLink href="/" className="hover:text-indigo-600 transition-colors">Home</SeoLink>
+                <SeoLink href="/blog" className="hover:text-indigo-600 transition-colors">Blog</SeoLink>
+                <SeoLink href="/faq" className="hover:text-indigo-600 transition-colors">FAQ</SeoLink>
+                <SeoLink href="/how-to/nextjs-sitemap-generation" className="hover:text-indigo-600 transition-colors">How-To</SeoLink>
+                <SeoLink href="/guides/generative-engine-optimization" className="hover:text-indigo-600 transition-colors">GEO Guides</SeoLink>
+                <SeoLink href="/products" className="hover:text-indigo-600 transition-colors">Products</SeoLink>
+                <SeoLink href="/categories" className="hover:text-indigo-600 transition-colors">Categories</SeoLink>
+                <SeoLink href="/about" className="hover:text-indigo-600 transition-colors">About</SeoLink>
+                <SeoLink href="/contact" className="hover:text-indigo-600 transition-colors">Contact</SeoLink>
               </nav>
 
               {/* Search Shortcut & CTA */}
               <div className="flex items-center space-x-4">
-                <Link 
+                <SeoLink 
                   href="/search" 
                   className="p-2 text-slate-500 hover:text-indigo-600 transition-colors"
                   aria-label="Search articles"
@@ -116,13 +134,13 @@ export default function RootLayout({
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
-                </Link>
-                <Link
+                </SeoLink>
+                <SeoLink
                   href="/faq"
                   className="hidden sm:inline-block px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors rounded-lg shadow-xs"
                 >
                   Search Optimization FAQ
-                </Link>
+                </SeoLink>
               </div>
             </div>
           </div>
@@ -145,14 +163,14 @@ export default function RootLayout({
                 </p>
               </div>
 
-              {/* Hub Links */}
+              {/* Hub links */}
               <div>
                 <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4">SEO/AEO Sections</h4>
                 <ul className="space-y-2 text-sm">
-                  <li><Link href="/" className="hover:text-white transition-colors">Homepage</Link></li>
-                  <li><Link href="/blog" className="hover:text-white transition-colors">Blog Archives</Link></li>
-                  <li><Link href="/faq" className="hover:text-white transition-colors">FAQ Index (AEO)</Link></li>
-                  <li><Link href="/about" className="hover:text-white transition-colors">E-E-A-T Profile (GEO)</Link></li>
+                  <li><SeoLink href="/" className="hover:text-white transition-colors">Homepage</SeoLink></li>
+                  <li><SeoLink href="/blog" className="hover:text-white transition-colors">Blog Archives</SeoLink></li>
+                  <li><SeoLink href="/faq" className="hover:text-white transition-colors">FAQ Index (AEO)</SeoLink></li>
+                  <li><SeoLink href="/about" className="hover:text-white transition-colors">E-E-A-T Profile (GEO)</SeoLink></li>
                 </ul>
               </div>
 
@@ -176,10 +194,10 @@ export default function RootLayout({
               <div>
                 <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4">Trust & Legal</h4>
                 <ul className="space-y-2 text-sm">
-                  <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
-                  <li><Link href="/editorial-policy" className="hover:text-white transition-colors">Editorial Policy</Link></li>
-                  <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                  <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+                  <li><SeoLink href="/contact" className="hover:text-white transition-colors">Contact</SeoLink></li>
+                  <li><SeoLink href="/editorial-policy" className="hover:text-white transition-colors">Editorial Policy</SeoLink></li>
+                  <li><SeoLink href="/privacy" className="hover:text-white transition-colors">Privacy Policy</SeoLink></li>
+                  <li><SeoLink href="/terms" className="hover:text-white transition-colors">Terms of Service</SeoLink></li>
                   <li><a href="/llms.txt" className="hover:text-white transition-colors">llms.txt</a></li>
                 </ul>
               </div>
@@ -189,9 +207,9 @@ export default function RootLayout({
             <div className="mt-12 pt-6 border-t border-slate-800 text-center text-xs text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-4">
               <span>&copy; {new Date().getFullYear()} TechKnowledge Hub. Built with Next.js App Router.</span>
               <div className="flex gap-4">
-                <Link href="/sitemap.xml" className="hover:text-slate-300">Sitemap</Link>
-                <Link href="/blog/sitemap.xml" className="hover:text-slate-300">Blog Sitemap</Link>
-                <Link href="/robots.txt" className="hover:text-slate-300">Robots</Link>
+                <SeoLink href="/sitemap.xml" className="hover:text-slate-300">Sitemap</SeoLink>
+                <SeoLink href="/blog/sitemap.xml" className="hover:text-slate-300">Blog Sitemap</SeoLink>
+                <SeoLink href="/robots.txt" className="hover:text-slate-300">Robots</SeoLink>
               </div>
             </div>
           </div>

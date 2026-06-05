@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { SeoLink } from '@/components/SeoLink';
 import { generateBreadcrumbSchema } from '@/lib/seo';
 import { StructuredData } from './StructuredData';
 
@@ -52,12 +52,12 @@ export function Breadcrumbs({ crumbs }: BreadcrumbsProps) {
                   {crumb.name}
                 </span>
               ) : (
-                <Link
+                <SeoLink
                   href={crumb.item}
                   className="hover:text-indigo-600 hover:underline transition-colors duration-150"
                 >
                   {crumb.name}
-                </Link>
+                </SeoLink>
               )}
             </li>
           );

@@ -2,10 +2,13 @@ import { constructMetadata } from '@/lib/seo';
 import { schemasForFaqPage } from '@/lib/page-schemas';
 import { JsonLd } from '@/components/JsonLd';
 import { FaqAccordion } from '@/components/FaqAccordion';
+import { AnswerBlock } from '@/components/AnswerBlock';
 import { TableOfContents } from '@/components/TableOfContents';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { mockFaqs } from '@/lib/utils';
 
+export const dynamic = 'force-static';
+export const revalidate = false;
 export const metadata = constructMetadata({
   title: 'Search Optimization FAQ | AEO & GEO Fundamentals',
   description:
@@ -48,6 +51,12 @@ export default function FaqPage() {
             <p className="text-sm text-slate-500 max-w-xl mx-auto leading-relaxed font-medium">
               Conversational definitions and direct answers designed to resolve query intents for voice assistants, answer bots, and traditional layouts.
             </p>
+            <div className="max-w-xl mx-auto text-left">
+              <AnswerBlock
+                question="What is the difference between SEO, AEO, and GEO?"
+                answer="SEO ranks pages in link-based search results. AEO formats direct answers for voice and featured snippets. GEO structures citations and machine-readable exports so LLMs cite your content in AI-generated answers."
+              />
+            </div>
           </header>
 
           {/* Grid Layout (Content + Table of Contents Sidebar) */}

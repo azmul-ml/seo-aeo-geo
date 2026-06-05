@@ -2,6 +2,7 @@ import { HowToSchemaProps } from '@/lib/seo';
 
 interface HowToStepsProps {
   guide: HowToSchemaProps;
+  topic?: string;
 }
 
 /**
@@ -12,7 +13,7 @@ interface HowToStepsProps {
  *   results to list the guide steps, estimated time, and tools right in the organic snippet.
  * - Clear Layout: Grouping tools and estimated time helps answer engine summarizers parse the tutorial layout.
  */
-export function HowToSteps({ guide }: HowToStepsProps) {
+export function HowToSteps({ guide, topic }: HowToStepsProps) {
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-xs space-y-6">
       {/* Guide Meta Header */}
@@ -75,7 +76,7 @@ export function HowToSteps({ guide }: HowToStepsProps) {
         <h3 className="text-lg font-bold text-gray-900 mb-5">Step-by-Step Directions</h3>
         <ol className="relative border-l border-gray-200 ml-3.5 space-y-8">
           {guide.steps.map((step, idx) => (
-            <li key={idx} className="relative pl-8">
+            <li key={idx} id={`step-${idx + 1}`} className="relative pl-8 scroll-mt-24">
               {/* Step indicator */}
               <span className="absolute -left-3.5 top-0 flex items-center justify-center w-7 h-7 bg-indigo-600 rounded-full ring-4 ring-white text-white text-xs font-bold">
                 {idx + 1}

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
+import Image from 'next/image';
+import { SeoLink } from '@/components/SeoLink';
 import { constructMetadata, SITE_URL } from '@/lib/seo';
 import { schemasForBlogPost } from '@/lib/page-schemas';
 import { JsonLd } from '@/components/JsonLd';
@@ -9,9 +10,13 @@ import { TableOfContents, TocItem } from '@/components/TableOfContents';
 import { AuthorCard } from '@/components/AuthorCard';
 import { mockArticles, formatDate, calculateReadingTime } from '@/lib/utils';
 import { ContentSummary } from '@/components/ContentSummary';
+import { AnswerBlock } from '@/components/AnswerBlock';
 import { FaqAccordion } from '@/components/FaqAccordion';
 import { RelatedEntities } from '@/components/RelatedEntities';
 
+export const dynamic = 'force-static';
+export const revalidate = false;
+export const dynamicParams = false;
 export async function generateStaticParams() {
   return mockArticles.map((a) => ({ slug: a.slug }));
 }
@@ -116,6 +121,21 @@ export default async function BlogPostPage({ params }: BlogPostProps) {
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
                 {article.title}
               </h1>
+
+              <div className="relative w-full aspect-[2/1] max-h-80 rounded-xl overflow-hidden border border-slate-200">
+                <Image
+                  src={article.image}
+                  alt={`Hero image for ${article.title}`}
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 768px"
+                />
+              </div>
+
+              {article.executiveSummary && (
+                <AnswerBlock question={`What is ${article.title}?`} answer={article.executiveSummary} />
+              )}
 
               {/* Freshness, Peer Review and Reading Time badges */}
               <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-500 pt-2">

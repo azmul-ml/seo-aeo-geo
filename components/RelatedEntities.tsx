@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { SeoLink } from '@/components/SeoLink';
 
 export interface RelatedLink {
   href: string;
@@ -20,13 +20,13 @@ export function RelatedEntities({ title = 'Related content', links }: RelatedEnt
       <ul className="space-y-2">
         {links.map((link) => (
           <li key={link.href}>
-            <Link
+            <SeoLink
               href={link.href}
               className="text-sm font-semibold text-indigo-600 hover:underline flex items-center gap-2"
             >
               <span className="text-[10px] uppercase text-slate-400 font-bold">{link.type}</span>
               {link.label}
-            </Link>
+            </SeoLink>
           </li>
         ))}
       </ul>

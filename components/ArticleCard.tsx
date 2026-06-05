@@ -1,4 +1,5 @@
-import Link from 'next/link';
+import Image from 'next/image';
+import { SeoLink } from '@/components/SeoLink';
 import { Article, formatDate } from '@/lib/utils';
 
 interface ArticleCardProps {
@@ -17,16 +18,17 @@ interface ArticleCardProps {
 export function ArticleCard({ article }: ArticleCardProps) {
   return (
     <article className="group bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-xs hover:shadow-md hover:border-gray-300 transition-all duration-200 flex flex-col h-full text-left">
-      {/* Decorative gradient header simulating background image */}
-      <div className="h-44 w-full bg-gradient-to-br from-indigo-500 to-purple-600 relative flex items-center justify-center p-6 text-white overflow-hidden">
-        {/* Subtle geometric pattern overlay */}
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white via-gray-900 to-black"></div>
-        <span className="absolute top-4 left-4 bg-white/20 backdrop-blur-xs text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md">
+      <div className="h-44 w-full relative overflow-hidden bg-slate-100">
+        <Image
+          src={article.image}
+          alt={`Cover image for ${article.title}`}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 50vw"
+        />
+        <span className="absolute top-4 left-4 bg-white/90 text-indigo-700 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md z-10">
           {article.category}
         </span>
-        <h3 className="text-xl font-bold leading-snug drop-shadow-sm select-none z-10 text-center">
-          {article.title}
-        </h3>
       </div>
 
       <div className="p-5 flex-1 flex flex-col justify-between">
@@ -53,7 +55,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
           </div>
 
           {/* Link Button */}
-          <Link 
+          <SeoLink 
             href={`/blog/${article.slug}`} 
             className="text-xs font-bold text-indigo-600 group-hover:text-indigo-800 flex items-center gap-0.5 transition-colors duration-150"
           >
@@ -61,7 +63,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
             <svg className="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
             </svg>
-          </Link>
+          </SeoLink>
         </div>
       </div>
     </article>

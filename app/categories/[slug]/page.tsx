@@ -1,18 +1,22 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
+import { SeoLink } from '@/components/SeoLink';
 import { constructMetadata } from '@/lib/seo';
 import { schemasForCategory } from '@/lib/page-schemas';
 import { categories, getCategory, getProduct } from '@/lib/catalog';
 import { JsonLd } from '@/components/JsonLd';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { FaqAccordion } from '@/components/FaqAccordion';
+import { AnswerBlock } from '@/components/AnswerBlock';
 import { formatDate } from '@/lib/utils';
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
 }
 
+export const dynamic = 'force-static';
+export const revalidate = false;
+export const dynamicParams = false;
 export async function generateStaticParams() {
   return categories.map((c) => ({ slug: c.slug }));
 }
@@ -65,6 +69,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-8">
           <header className="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 text-left space-y-3">
             <h1 className="text-3xl font-black text-slate-900">{category.name}</h1>
+            <AnswerBlock question={`What is the ${category.name} category?`} answer={category.summary} />
             <p className="text-sm text-slate-600 font-medium">{category.summary}</p>
             <p className="text-xs text-slate-500">
               Last updated: <time dateTime={category.dateModified}>{formatDate(category.dateModified)}</time>
@@ -88,9 +93,9 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                 <li key={p!.slug}>
                   <article className="bg-white border border-slate-200 rounded-xl p-5 h-full">
                     <h3 className="font-bold text-slate-900">
-                      <Link href={`/products/${p!.slug}`} className="hover:text-indigo-600">
+                      <SeoLink href={`/products/${p!.slug}`} className="hover:text-indigo-600">
                         {p!.name}
-                      </Link>
+                      </SeoLink>
                     </h3>
                     <p className="text-xs text-slate-600 mt-2">{p!.summary}</p>
                   </article>
@@ -110,12 +115,12 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                   if (!c) return null;
                   return (
                     <li key={rel}>
-                      <Link
+                      <SeoLink
                         href={`/categories/${rel}`}
                         className="text-sm font-semibold text-indigo-600 hover:underline"
                       >
                         {c.name}
-                      </Link>
+                      </SeoLink>
                     </li>
                   );
                 })}
@@ -130,9 +135,9 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
           <p className="text-xs text-slate-500 text-center">
             AI export:{' '}
-            <Link href={`/api/ai/categories/${slug}`} className="text-indigo-600 hover:underline">
+            <SeoLink href={`/api/ai/categories/${slug}`} className="text-indigo-600 hover:underline">
               /api/ai/categories/{slug}
-            </Link>
+            </SeoLink>
           </p>
         </div>
       </div>

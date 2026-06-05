@@ -22,7 +22,7 @@ export default function robots(): MetadataRoute.Robots {
       },
       {
         userAgent: 'Bingbot',
-        allow: '/',
+        allow: ['/', '/api/ai/', '/llms.txt', '/llms-full.txt', '/feed.xml'],
         disallow: ['/search', '/api/', '/_next/'],
       },
       ...AI_BOTS.map((bot) => ({

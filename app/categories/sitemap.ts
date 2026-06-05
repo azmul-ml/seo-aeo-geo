@@ -1,12 +1,12 @@
 import type { MetadataRoute } from 'next';
-import { SITE_URL } from '@/lib/seo';
+import { SITE_LAST_UPDATED, SITE_URL } from '@/lib/seo';
 import { categories } from '@/lib/catalog';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
       url: `${SITE_URL}/categories`,
-      lastModified: new Date().toISOString(),
+      lastModified: SITE_LAST_UPDATED,
       changeFrequency: 'weekly',
       priority: 0.8,
     },

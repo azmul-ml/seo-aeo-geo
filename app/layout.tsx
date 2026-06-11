@@ -1,5 +1,6 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
+import { PwaRegister } from '@/components/PwaRegister';
 import { SeoLink } from '@/components/SeoLink';
 import { StructuredData } from '@/components/StructuredData';
 import {
@@ -44,8 +45,14 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [{ url: '/icon', type: 'image/png' }],
-    apple: [{ url: '/images/icons/icon-192.svg', sizes: '192x192', type: 'image/svg+xml' }],
+    apple: [{ url: '/apple-icon', sizes: '180x180', type: 'image/png' }],
   },
+  appleWebApp: {
+    capable: true,
+    title: 'TechKnowledge',
+    statusBarStyle: 'default',
+  },
+  applicationName: 'TechKnowledge Hub',
   ...(process.env.NEXT_PUBLIC_GOOGLE_VERIFY && {
     verification: {
       google: process.env.NEXT_PUBLIC_GOOGLE_VERIFY,
@@ -95,11 +102,12 @@ export default function RootLayout({
         <link rel="alternate" type="text/plain" title="LLMs.txt" href={LLMS_TXT_URL} />
         <link rel="alternate" type="text/plain" title="LLMs.txt (full index)" href={LLMS_FULL_TXT_URL} />
         <link rel="alternate" type="application/rss+xml" title="RSS Feed" href={`${SITE_URL}/feed.xml`} />
-        <link rel="apple-touch-icon" href="/images/icons/icon-192.svg" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <StructuredData schema={generateWebsiteSchema()} />
         <StructuredData schema={generateOrganizationSchema()} />
       </head>
       <body className="bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased">
+        <PwaRegister />
         {/* Semantic Header */}
         <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
